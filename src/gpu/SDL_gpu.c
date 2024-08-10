@@ -463,8 +463,8 @@ SDL_GpuTexture *SDL_GpuCreateTexture(
         } else {
             if (textureCreateInfo->layerCount > 1) {
                 /* Array Texture Validation */
-                if (textureCreateInfo->usageFlags & (SDL_GPU_TEXTUREUSAGE_COLOR_TARGET_BIT | SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET_BIT)) {
-                    SDL_assert_release(!"For array textures: usageFlags must not contain COLOR_TARGET_BIT or DEPTH_STENCIL_TARGET_BIT");
+                if (textureCreateInfo->usageFlags & SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET_BIT) {
+                    SDL_assert_release(!"For array textures: usageFlags must not contain DEPTH_STENCIL_TARGET_BIT");
                     failed = SDL_TRUE;
                 }
                 if (textureCreateInfo->sampleCount > SDL_GPU_SAMPLECOUNT_1) {
@@ -1762,6 +1762,10 @@ void SDL_GpuBlit(
         TextureCommonHeader *srcHeader = (TextureCommonHeader *)source->textureSlice.texture;
         TextureCommonHeader *dstHeader = (TextureCommonHeader *)destination->textureSlice.texture;
 
+        if (srcHeader == NULL || dstHeader == NULL) {
+            SDL_assert_release(!"Blit source and destination textures must be non-NULL");
+            return; /* attempting to proceed will crash */
+        }
         if ((srcHeader->info.usageFlags & SDL_GPU_TEXTUREUSAGE_SAMPLER_BIT) == 0) {
             SDL_assert_release(!"Blit source texture must be created with the SAMPLER_BIT usage flag");
             failed = SDL_TRUE;
@@ -1776,6 +1780,10 @@ void SDL_GpuBlit(
         }
         if (srcHeader->info.format != dstHeader->info.format) {
             SDL_assert_release(!"Blit source and destination textures must be have the same format");
+            failed = SDL_TRUE;
+        }
+        if (source->w == 0 || source->h == 0 || destination->w == 0 || destination->h == 0) {
+            SDL_assert_release(!"Blit source/destination regions must have non-zero width and height");
             failed = SDL_TRUE;
         }
 
