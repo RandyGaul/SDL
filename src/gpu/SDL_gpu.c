@@ -284,7 +284,6 @@ SDL_GpuComputePipeline *SDL_GpuCreateComputePipeline(
         return NULL;
     }
     if (computePipelineCreateInfo->readWriteStorageBufferCount > MAX_COMPUTE_WRITE_BUFFERS) {
-        SDL_InvalidParamError("computePipelineCreateInfo");
         SDL_assert_release(!"Compute pipeline read-write buffer count cannot be higher than 8!");
         return NULL;
     }
