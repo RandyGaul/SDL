@@ -55,10 +55,22 @@
         return;                                              \
     }
 
+#define CHECK_GRAPHICS_PIPELINE_BOUND                                                       \
+    if (!((CommandBufferCommonHeader *)RENDERPASS_COMMAND_BUFFER)->graphicsPipelineBound) { \
+        SDL_assert_release(!"Graphics pipeline not bound!");                                \
+        return;                                                                             \
+    }
+
 #define CHECK_COMPUTEPASS                                     \
     if (!((Pass *)computePass)->inProgress) {                 \
         SDL_assert_release(!"Compute pass not in progress!"); \
         return;                                               \
+    }
+
+#define CHECK_COMPUTE_PIPELINE_BOUND                                                        \
+    if (!((CommandBufferCommonHeader *)COMPUTEPASS_COMMAND_BUFFER)->computePipelineBound) { \
+        SDL_assert_release(!"Compute pipeline not bound!");                                 \
+        return;                                                                             \
     }
 
 #define CHECK_COPYPASS                                     \
@@ -1156,6 +1168,7 @@ void SDL_GpuDrawIndexedPrimitives(
 
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
+        CHECK_GRAPHICS_PIPELINE_BOUND
     }
 
     RENDERPASS_DEVICE->DrawIndexedPrimitives(
@@ -1178,6 +1191,7 @@ void SDL_GpuDrawPrimitives(
 
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
+        CHECK_GRAPHICS_PIPELINE_BOUND
     }
 
     RENDERPASS_DEVICE->DrawPrimitives(
@@ -1204,6 +1218,7 @@ void SDL_GpuDrawPrimitivesIndirect(
 
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
+        CHECK_GRAPHICS_PIPELINE_BOUND
     }
 
     RENDERPASS_DEVICE->DrawPrimitivesIndirect(
@@ -1232,6 +1247,7 @@ void SDL_GpuDrawIndexedPrimitivesIndirect(
 
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
+        CHECK_GRAPHICS_PIPELINE_BOUND
     }
 
     RENDERPASS_DEVICE->DrawIndexedPrimitivesIndirect(
@@ -1404,6 +1420,7 @@ void SDL_GpuDispatchCompute(
 
     if (COMPUTEPASS_DEVICE->debugMode) {
         CHECK_COMPUTEPASS
+        CHECK_COMPUTE_PIPELINE_BOUND
     }
 
     COMPUTEPASS_DEVICE->DispatchCompute(
@@ -1425,6 +1442,7 @@ void SDL_GpuDispatchComputeIndirect(
 
     if (COMPUTEPASS_DEVICE->debugMode) {
         CHECK_COMPUTEPASS
+        CHECK_COMPUTE_PIPELINE_BOUND
     }
 
     COMPUTEPASS_DEVICE->DispatchComputeIndirect(
