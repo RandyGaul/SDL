@@ -279,15 +279,15 @@ SDL_GpuComputePipeline *SDL_GpuCreateComputePipeline(
         SDL_InvalidParamError("computePipelineCreateInfo");
         return NULL;
     }
-    if (computePipelineCreateInfo->readWriteStorageTextureCount > MAX_COMPUTE_WRITE_TEXTURES) {
-        SDL_assert_release(!"Compute pipeline read-write texture count cannot be higher than 8!");
-        return NULL;
-    }
-    if (computePipelineCreateInfo->readWriteStorageBufferCount > MAX_COMPUTE_WRITE_BUFFERS) {
-        SDL_assert_release(!"Compute pipeline read-write buffer count cannot be higher than 8!");
-        return NULL;
-    }
     if (device->debugMode) {
+        if (computePipelineCreateInfo->readWriteStorageTextureCount > MAX_COMPUTE_WRITE_TEXTURES) {
+            SDL_assert_release(!"Compute pipeline read-write texture count cannot be higher than 8!");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->readWriteStorageBufferCount > MAX_COMPUTE_WRITE_BUFFERS) {
+            SDL_assert_release(!"Compute pipeline read-write buffer count cannot be higher than 8!");
+            return NULL;
+        }
         if (computePipelineCreateInfo->threadCountX == 0 ||
             computePipelineCreateInfo->threadCountY == 0 ||
             computePipelineCreateInfo->threadCountZ == 0) {
