@@ -3801,7 +3801,7 @@ static SDL_bool VULKAN_INTERNAL_InitializeComputePipelineResourceLayout(
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
     DescriptorSetPool *descriptorSetPool;
     VkResult vulkanResult;
-    Uint32 i;
+    int i;
 
     pipelineResourceLayout->readOnlyStorageTextureCount = pipelineCreateInfo->readOnlyStorageTextureCount;
     pipelineResourceLayout->readOnlyStorageBufferCount = pipelineCreateInfo->readOnlyStorageBufferCount;
@@ -3839,7 +3839,7 @@ static SDL_bool VULKAN_INTERNAL_InitializeComputePipelineResourceLayout(
             descriptorSetPool->descriptorInfos[i].stageFlag = VK_SHADER_STAGE_COMPUTE_BIT;
         }
 
-        for (i = pipelineCreateInfo->readOnlyStorageTextureCount; i < descriptorSetLayoutCreateInfo.bindingCount; i += 1) {
+        for (i = pipelineCreateInfo->readOnlyStorageTextureCount; i < (int)descriptorSetLayoutCreateInfo.bindingCount; i += 1) {
             descriptorSetLayoutBindings[i].binding = i;
             descriptorSetLayoutBindings[i].descriptorCount = 1;
             descriptorSetLayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -3894,7 +3894,7 @@ static SDL_bool VULKAN_INTERNAL_InitializeComputePipelineResourceLayout(
             descriptorSetPool->descriptorInfos[i].stageFlag = VK_SHADER_STAGE_COMPUTE_BIT;
         }
 
-        for (i = pipelineCreateInfo->readWriteStorageTextureCount; i < descriptorSetLayoutCreateInfo.bindingCount; i += 1) {
+        for (i = pipelineCreateInfo->readWriteStorageTextureCount; i < (int)descriptorSetLayoutCreateInfo.bindingCount; i += 1) {
             descriptorSetLayoutBindings[i].binding = i;
             descriptorSetLayoutBindings[i].descriptorCount = 1;
             descriptorSetLayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -6183,7 +6183,7 @@ static VkRenderPass VULKAN_INTERNAL_CreateTransientRenderPass(
     Uint32 attachmentDescriptionCount = 0;
     Uint32 colorAttachmentReferenceCount = 0;
     Uint32 resolveReferenceCount = 0;
-    Uint32 i;
+    int i;
 
     for (i = 0; i < attachmentInfo.colorAttachmentCount; i += 1) {
         attachmentDescription = attachmentInfo.colorAttachmentDescriptions[i];
@@ -6326,7 +6326,7 @@ static SDL_GpuGraphicsPipeline *VULKAN_CreateGraphicsPipeline(
     SDL_GpuGraphicsPipelineCreateInfo *pipelineCreateInfo)
 {
     VkResult vulkanResult;
-    Uint32 i;
+    int i;
     VkSampleCountFlagBits actualSampleCount;
 
     VulkanGraphicsPipeline *graphicsPipeline = (VulkanGraphicsPipeline *)SDL_malloc(sizeof(VulkanGraphicsPipeline));

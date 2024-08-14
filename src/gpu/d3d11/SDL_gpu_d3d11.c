@@ -1337,7 +1337,7 @@ static ID3D11InputLayout *D3D11_INTERNAL_FetchInputLayout(
 {
     ID3D11InputLayout *result = NULL;
     D3D11_INPUT_ELEMENT_DESC *elementDescs;
-    Uint32 bindingIndex;
+    int bindingIndex;
     HRESULT res;
 
     /* Don't bother creating/fetching an input layout if there are no attributes. */
@@ -1351,10 +1351,10 @@ static ID3D11InputLayout *D3D11_INTERNAL_FetchInputLayout(
         inputState.vertexAttributeCount);
 
     /* Create the array of input elements */
-    for (Uint32 i = 0; i < inputState.vertexAttributeCount; i += 1) {
+    for (int i = 0; i < inputState.vertexAttributeCount; i += 1) {
         elementDescs[i].AlignedByteOffset = inputState.vertexAttributes[i].offset;
         elementDescs[i].Format = SDLToD3D11_VertexFormat[inputState.vertexAttributes[i].format];
-        elementDescs[i].InputSlot = inputState.vertexAttributes[i].binding;
+        elementDescs[i].InputSlot = (Uint32)inputState.vertexAttributes[i].binding;
 
         bindingIndex = D3D11_INTERNAL_FindIndexOfVertexBinding(
             elementDescs[i].InputSlot,
@@ -1554,10 +1554,10 @@ static SDL_GpuGraphicsPipeline *D3D11_CreateGraphicsPipeline(
 
     if (pipelineCreateInfo->vertexInputState.vertexBindingCount > 0) {
         pipeline->vertexStrides = SDL_malloc(
-            sizeof(Uint32) *
+            sizeof(int) *
             pipelineCreateInfo->vertexInputState.vertexBindingCount);
 
-        for (Uint32 i = 0; i < pipelineCreateInfo->vertexInputState.vertexBindingCount; i += 1) {
+        for (int i = 0; i < pipelineCreateInfo->vertexInputState.vertexBindingCount; i += 1) {
             pipeline->vertexStrides[i] = pipelineCreateInfo->vertexInputState.vertexBindings[i].stride;
         }
     } else {
@@ -1979,16 +1979,16 @@ static D3D11Texture *D3D11_INTERNAL_CreateTexture(
     d3d11Texture->subresources = SDL_malloc(
         d3d11Texture->subresourceCount * sizeof(D3D11TextureSubresource));
 
-    for (Uint32 layerIndex = 0; layerIndex < createInfo->layerCount; layerIndex += 1) {
-        for (Uint32 levelIndex = 0; levelIndex < createInfo->levelCount; levelIndex += 1) {
+    for (int layerIndex = 0; layerIndex < createInfo->layerCount; layerIndex += 1) {
+        for (int levelIndex = 0; levelIndex < createInfo->levelCount; levelIndex += 1) {
             Uint32 subresourceIndex = D3D11_INTERNAL_CalcSubresource(
-                levelIndex,
-                layerIndex,
-                createInfo->levelCount);
+                (Uint32)levelIndex,
+                (Uint32)layerIndex,
+                (Uint32)createInfo->levelCount);
 
             d3d11Texture->subresources[subresourceIndex].parent = d3d11Texture;
-            d3d11Texture->subresources[subresourceIndex].layer = layerIndex;
-            d3d11Texture->subresources[subresourceIndex].level = levelIndex;
+            d3d11Texture->subresources[subresourceIndex].layer = (Uint32)layerIndex;
+            d3d11Texture->subresources[subresourceIndex].level = (Uint32)levelIndex;
             d3d11Texture->subresources[subresourceIndex].index = subresourceIndex;
 
             d3d11Texture->subresources[subresourceIndex].colorTargetView = NULL;

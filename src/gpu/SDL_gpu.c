@@ -30,13 +30,13 @@
 
 #define CHECK_COMMAND_BUFFER                                       \
     if (((CommandBufferCommonHeader *)commandBuffer)->submitted) { \
-        SDL_assert_release(!"Command buffer already submitted!");  \
+        SDL_assert_release(!"Command buffer already submitted.");  \
         return;                                                    \
     }
 
 #define CHECK_COMMAND_BUFFER_RETURN_NULL                           \
     if (((CommandBufferCommonHeader *)commandBuffer)->submitted) { \
-        SDL_assert_release(!"Command buffer already submitted!");  \
+        SDL_assert_release(!"Command buffer already submitted.");  \
         return NULL;                                               \
     }
 
@@ -45,37 +45,37 @@
         ((CommandBufferCommonHeader *)commandBuffer)->renderPass.inProgress ||  \
         ((CommandBufferCommonHeader *)commandBuffer)->computePass.inProgress || \
         ((CommandBufferCommonHeader *)commandBuffer)->copyPass.inProgress) {    \
-        SDL_assert_release(!"Pass already in progress!");                       \
+        SDL_assert_release(!"Pass already in progress.");                       \
         return NULL;                                                            \
     }
 
 #define CHECK_RENDERPASS                                     \
     if (!((Pass *)renderPass)->inProgress) {                 \
-        SDL_assert_release(!"Render pass not in progress!"); \
+        SDL_assert_release(!"Render pass not in progress."); \
         return;                                              \
     }
 
 #define CHECK_GRAPHICS_PIPELINE_BOUND                                                       \
     if (!((CommandBufferCommonHeader *)RENDERPASS_COMMAND_BUFFER)->graphicsPipelineBound) { \
-        SDL_assert_release(!"Graphics pipeline not bound!");                                \
+        SDL_assert_release(!"Graphics pipeline not bound.");                                \
         return;                                                                             \
     }
 
 #define CHECK_COMPUTEPASS                                     \
     if (!((Pass *)computePass)->inProgress) {                 \
-        SDL_assert_release(!"Compute pass not in progress!"); \
+        SDL_assert_release(!"Compute pass not in progress."); \
         return;                                               \
     }
 
 #define CHECK_COMPUTE_PIPELINE_BOUND                                                        \
     if (!((CommandBufferCommonHeader *)COMPUTEPASS_COMMAND_BUFFER)->computePipelineBound) { \
-        SDL_assert_release(!"Compute pipeline not bound!");                                 \
+        SDL_assert_release(!"Compute pipeline not bound.");                                 \
         return;                                                                             \
     }
 
 #define CHECK_COPYPASS                                     \
     if (!((Pass *)copyPass)->inProgress) {                 \
-        SDL_assert_release(!"Copy pass not in progress!"); \
+        SDL_assert_release(!"Copy pass not in progress."); \
         return;                                            \
     }
 
@@ -143,7 +143,7 @@ static SDL_GpuDriver SDL_GpuSelectBackend(SDL_VideoDevice *_this, SDL_Properties
         }
     }
 
-    SDL_LogError(SDL_LOG_CATEGORY_GPU, "No supported SDL_Gpu backend found!");
+    SDL_LogError(SDL_LOG_CATEGORY_GPU, "No supported SDL_Gpu backend found.");
     return SDL_GPU_DRIVER_INVALID;
 }
 
@@ -192,7 +192,7 @@ SDL_GpuDriver SDL_GpuGetDriver(SDL_GpuDevice *device)
     return device->backend;
 }
 
-Uint32 SDL_GpuTextureFormatTexelBlockSize(
+int SDL_GpuTextureFormatTexelBlockSize(
     SDL_GpuTextureFormat textureFormat)
 {
     switch (textureFormat) {
@@ -235,7 +235,7 @@ Uint32 SDL_GpuTextureFormatTexelBlockSize(
     case SDL_GPU_TEXTUREFORMAT_R32G32B32A32_SFLOAT:
         return 16;
     default:
-        SDL_assert_release(!"Unrecognized TextureFormat!");
+        SDL_assert_release(!"Unrecognized TextureFormat.");
         return 0;
     }
 }
@@ -268,6 +268,91 @@ SDL_GpuSampleCount SDL_GpuGetBestSampleCount(
         desiredSampleCount);
 }
 
+/* Debug Asserts */
+
+static void SDL_GpuAssertTextureSlice(SDL_GpuTextureSlice* textureSlice)
+{
+    if (textureSlice->layer < 0) {
+        SDL_assert_release(!"textureSlice->layer must be greater than zero.");
+    }
+    if (textureSlice->mipLevel < 0) {
+        SDL_assert_release(!"textureSlice->mipLevel must be greater than zero.");
+    }
+}
+
+static void SDL_GpuAssertTextureLocation(SDL_GpuTextureLocation* textureLocation)
+{
+    SDL_GpuAssertTextureSlice(&textureLocation->textureSlice);
+    if (textureLocation->x < 0) {
+        SDL_assert_release(!"textureLocation->x must be greater than zero.");
+    }
+    if (textureLocation->y < 0) {
+        SDL_assert_release(!"textureLocation->y must be greater than zero.");
+    }
+    if (textureLocation->z < 0) {
+        SDL_assert_release(!"textureLocation->z must be greater than zero.");
+    }
+}
+
+static void SDL_GpuAssertTextureRegion(SDL_GpuTextureRegion* textureRegion)
+{
+    if (textureRegion->x < 0) {
+        SDL_assert_release(!"textureRegion->x must be greater than zero.");
+    }
+    if (textureRegion->y < 0) {
+        SDL_assert_release(!"textureRegion->y must be greater than zero.");
+    }
+    if (textureRegion->z < 0) {
+        SDL_assert_release(!"textureRegion->z must be greater than zero.");
+    }
+    if (textureRegion->w < 0) {
+        SDL_assert_release(!"textureRegion->w must be greater than zero.");
+    }
+    if (textureRegion->h < 0) {
+        SDL_assert_release(!"textureRegion->h must be greater than zero.");
+    }
+    if (textureRegion->d < 0) {
+        SDL_assert_release(!"textureRegion->d must be greater than zero.");
+    }
+}
+
+static void SDL_GpuAssertBufferLocation(SDL_GpuBufferLocation* bufferLocation)
+{
+    if (bufferLocation->offset < 0) {
+        SDL_assert_release(!"location->offset must be greater than zero.");
+    }
+}
+
+static void SDL_GpuAssertTransferBufferLocation(SDL_GpuTransferBufferLocation* bufferLocation)
+{
+    if (bufferLocation->offset < 0) {
+        SDL_assert_release(!"location->offset must be greater than zero.");
+    }
+}
+
+static void SDL_GpuAssertBufferRegion(SDL_GpuBufferRegion* bufferRegion)
+{
+    if (bufferRegion->offset < 0) {
+        SDL_assert_release(!"bufferRegion->offset must be greater than zero.");
+    }
+    if (bufferRegion->size < 0) {
+        SDL_assert_release(!"bufferRegion->size must be greater than zero.");
+    }
+}
+
+static SDL_GpuAssertTextureTransferInfo(SDL_GpuTextureTransferInfo* textureTransferInfo)
+{
+    if (textureTransferInfo->offset < 0) {
+        SDL_assert_release(!"textureTransferInfo->offset must be greater than zero.");
+    }
+    if (textureTransferInfo->imagePitch < 0) {
+        SDL_assert_release(!"textureTransferInfo->imagePitch must be greater than zero.");
+    }
+    if (textureTransferInfo->imageHeight < 0) {
+        SDL_assert_release(!"textureTransferInfo->imageHeight must be greater than zero.");
+    }
+}
+
 /* State Creation */
 
 SDL_GpuComputePipeline *SDL_GpuCreateComputePipeline(
@@ -284,7 +369,39 @@ SDL_GpuComputePipeline *SDL_GpuCreateComputePipeline(
         if (computePipelineCreateInfo->threadCountX == 0 ||
             computePipelineCreateInfo->threadCountY == 0 ||
             computePipelineCreateInfo->threadCountZ == 0) {
-            SDL_assert_release(!"All ComputePipeline threadCount dimensions must be at least 1!");
+            SDL_assert_release(!"All ComputePipeline threadCount dimensions must be at least 1.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->readOnlyStorageTextureCount < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->readOnlyStorageTextureCount should be greater than zero.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->readOnlyStorageBufferCount < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->readOnlyStorageBufferCount should be greater than zero.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->readWriteStorageTextureCount < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->readWriteStorageTextureCount should be greater than zero.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->readWriteStorageBufferCount < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->readWriteStorageBufferCount should be greater than zero.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->uniformBufferCount < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->uniformBufferCount should be greater than zero.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->threadCountX < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->threadCountX should be greater than zero.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->threadCountY < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->threadCountY should be greater than zero.");
+            return NULL;
+        }
+        if (computePipelineCreateInfo->threadCountZ < 0) {
+            SDL_assert_release(!"computePipelineCreateInfo->threadCountZ should be greater than zero.");
             return NULL;
         }
     }
@@ -304,6 +421,61 @@ SDL_GpuGraphicsPipeline *SDL_GpuCreateGraphicsPipeline(
     if (graphicsPipelineCreateInfo == NULL) {
         SDL_InvalidParamError("graphicsPipelineCreateInfo");
         return NULL;
+    }
+
+    if (device->debugMode) {
+        if (graphicsPipelineCreateInfo->vertexInputState.vertexBindingCount < 0) {
+            SDL_assert_release(!"vertexInputState->vertexBindingCount should be greater than zero.");
+            return NULL;
+        }
+        if (graphicsPipelineCreateInfo->vertexInputState.vertexAttributeCount < 0) {
+            SDL_assert_release(!"vertexInputState->vertexAttributeCount should be greater than zero.");
+            return NULL;
+        }
+        if (graphicsPipelineCreateInfo->vertexInputState.vertexBindings) {
+            for (int i = 0; i < graphicsPipelineCreateInfo->vertexInputState.vertexBindingCount; ++i) {
+                if (graphicsPipelineCreateInfo->vertexInputState.vertexBindings[i].binding < 0) {
+                    SDL_assert_release(!"vertexBindings[i].binding should be greater than zero.");
+                    return NULL;
+                }
+                if (graphicsPipelineCreateInfo->vertexInputState.vertexBindings[i].stride < 0) {
+                    SDL_assert_release(!"vertexBindings[i].stride should be greater than zero.");
+                    return NULL;
+                }
+                if (graphicsPipelineCreateInfo->vertexInputState.vertexBindings[i].stepRate < 0) {
+                    SDL_assert_release(!"vertexBindings[i].stepRate should be greater than zero.");
+                    return NULL;
+                }
+            }
+        }
+        if (graphicsPipelineCreateInfo->vertexInputState.vertexAttributes) {
+            for (int i = 0; i < graphicsPipelineCreateInfo->vertexInputState.vertexAttributeCount; ++i) {
+                if (graphicsPipelineCreateInfo->vertexInputState.vertexAttributes[i].location < 0) {
+                    SDL_assert_release(!"vertexAttributes[i].location should be greater than zero.");
+                    return NULL;
+                }
+                if (graphicsPipelineCreateInfo->vertexInputState.vertexAttributes[i].binding < 0) {
+                    SDL_assert_release(!"vertexAttributes[i].binding should be greater than zero.");
+                    return NULL;
+                }
+                if (graphicsPipelineCreateInfo->vertexInputState.vertexAttributes[i].offset < 0) {
+                    SDL_assert_release(!"vertexAttributes[i].offset should be greater than zero.");
+                    return NULL;
+                }
+            }
+        }
+        if (graphicsPipelineCreateInfo->attachmentInfo.colorAttachmentCount < 0) {
+            SDL_assert_release(!"colorAttachmentCount should be greater than zero.");
+            return NULL;
+        }
+        if (graphicsPipelineCreateInfo->attachmentInfo.colorAttachmentDescriptions) {
+            for (int i = 0; i < graphicsPipelineCreateInfo->attachmentInfo.colorAttachmentCount; ++i) {
+                if (graphicsPipelineCreateInfo->attachmentInfo.colorAttachmentDescriptions[i].format == SDL_GPU_TEXTUREFORMAT_INVALID) {
+                    SDL_assert_release(!"colorAttachmentDescriptions[i].format should be valid.");
+                    return NULL;
+                }
+            }
+        }
     }
 
     /* Automatically swap out the depth format if it's unsupported.
@@ -389,10 +561,31 @@ SDL_GpuTexture *SDL_GpuCreateTexture(
     }
 
     if (device->debugMode) {
+        if (textureCreateInfo->width < 0) {
+            SDL_assert_release(!"textureCreateInfo->width should be greater than zero.");
+            return NULL;
+        }
+        if (textureCreateInfo->height < 0) {
+            SDL_assert_release(!"textureCreateInfo->height should be greater than zero.");
+            return NULL;
+        }
+        if (textureCreateInfo->depth < 0) {
+            SDL_assert_release(!"textureCreateInfo->depth should be greater than zero.");
+            return NULL;
+        }
+        if (textureCreateInfo->layerCount < 0) {
+            SDL_assert_release(!"textureCreateInfo->layerCount should be greater than zero.");
+            return NULL;
+        }
+        if (textureCreateInfo->levelCount < 0) {
+            SDL_assert_release(!"textureCreateInfo->levelCount should be greater than zero.");
+            return NULL;
+        }
+
         SDL_bool failed = SDL_FALSE;
 
-        const Uint32 MAX_2D_DIMENSION = 16384;
-        const Uint32 MAX_3D_DIMENSION = 2048;
+        const int MAX_2D_DIMENSION = 16384;
+        const int MAX_3D_DIMENSION = 2048;
 
         /* Common checks for all texture types */
         if (textureCreateInfo->width <= 0 || textureCreateInfo->height <= 0 || textureCreateInfo->depth <= 0) {
@@ -758,9 +951,9 @@ SDL_GpuCommandBuffer *SDL_GpuAcquireCommandBuffer(
 
 void SDL_GpuPushVertexUniformData(
     SDL_GpuCommandBuffer *commandBuffer,
-    Uint32 slotIndex,
+    int slotIndex,
     const void *data,
-    Uint32 dataLengthInBytes)
+    Uint32 sizeInBytes)
 {
     if (commandBuffer == NULL) {
         SDL_InvalidParamError("commandBuffer");
@@ -773,20 +966,24 @@ void SDL_GpuPushVertexUniformData(
 
     if (COMMAND_BUFFER_DEVICE->debugMode) {
         CHECK_COMMAND_BUFFER
+
+        if (slotIndex < 0) {
+            SDL_assert_release(!"slotIndex must be greater than zero.");
+        }
     }
 
     COMMAND_BUFFER_DEVICE->PushVertexUniformData(
         commandBuffer,
         slotIndex,
         data,
-        dataLengthInBytes);
+        sizeInBytes);
 }
 
 void SDL_GpuPushFragmentUniformData(
     SDL_GpuCommandBuffer *commandBuffer,
-    Uint32 slotIndex,
+    int slotIndex,
     const void *data,
-    Uint32 dataLengthInBytes)
+    Uint32 sizeInBytes)
 {
     if (commandBuffer == NULL) {
         SDL_InvalidParamError("commandBuffer");
@@ -799,18 +996,22 @@ void SDL_GpuPushFragmentUniformData(
 
     if (COMMAND_BUFFER_DEVICE->debugMode) {
         CHECK_COMMAND_BUFFER
+
+        if (slotIndex < 0) {
+            SDL_assert_release(!"slotIndex must be greater than zero.");
+        }
     }
 
     COMMAND_BUFFER_DEVICE->PushFragmentUniformData(
         commandBuffer,
         slotIndex,
         data,
-        dataLengthInBytes);
+        sizeInBytes);
 }
 
 void SDL_GpuPushComputeUniformData(
     SDL_GpuCommandBuffer *commandBuffer,
-    Uint32 slotIndex,
+    int slotIndex,
     const void *data,
     Uint32 dataLengthInBytes)
 {
@@ -825,6 +1026,10 @@ void SDL_GpuPushComputeUniformData(
 
     if (COMMAND_BUFFER_DEVICE->debugMode) {
         CHECK_COMMAND_BUFFER
+
+        if (slotIndex < 0) {
+            SDL_assert_release(!"slotIndex must be greater than zero.");
+        }
     }
 
     COMMAND_BUFFER_DEVICE->PushComputeUniformData(
@@ -839,7 +1044,7 @@ void SDL_GpuPushComputeUniformData(
 SDL_GpuRenderPass *SDL_GpuBeginRenderPass(
     SDL_GpuCommandBuffer *commandBuffer,
     SDL_GpuColorAttachmentInfo *colorAttachmentInfos,
-    Uint32 colorAttachmentCount,
+    int colorAttachmentCount,
     SDL_GpuDepthStencilAttachmentInfo *depthStencilAttachmentInfo)
 {
     CommandBufferCommonHeader *commandBufferHeader;
@@ -861,6 +1066,17 @@ SDL_GpuRenderPass *SDL_GpuBeginRenderPass(
     if (COMMAND_BUFFER_DEVICE->debugMode) {
         CHECK_COMMAND_BUFFER_RETURN_NULL
         CHECK_ANY_PASS_IN_PROGRESS
+
+        if (colorAttachmentCount < 0) {
+            SDL_assert_release(!"colorAttachmentCount must be greater than zero.");
+        } else {
+            for (int i = 0; i < colorAttachmentCount; ++i) {
+                SDL_GpuAssertTextureSlice(&colorAttachmentInfos[i].textureSlice);
+            }
+        }
+        if (depthStencilAttachmentInfo) {
+            SDL_GpuAssertTextureSlice(&depthStencilAttachmentInfo->textureSlice);
+        }
     }
 
     COMMAND_BUFFER_DEVICE->BeginRenderPass(
@@ -943,9 +1159,9 @@ void SDL_GpuSetScissor(
 
 void SDL_GpuBindVertexBuffers(
     SDL_GpuRenderPass *renderPass,
-    Uint32 firstBinding,
+    int firstBinding,
     SDL_GpuBufferBinding *pBindings,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -959,6 +1175,19 @@ void SDL_GpuBindVertexBuffers(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (firstBinding < 0) {
+            SDL_assert_release(!"x must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"y must be greater than zero.");
+        } else {
+            for (int i = 0; i < bindingCount; ++i) {
+                if (pBindings[i].offset < 0) {
+                    SDL_assert_release(!"pBindings[i].offset must be greater than zero.");
+                }
+            }
+        }
     }
 
     RENDERPASS_DEVICE->BindVertexBuffers(
@@ -985,6 +1214,10 @@ void SDL_GpuBindIndexBuffer(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (pBinding->offset < 0) {
+            SDL_assert_release(!"offset must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->BindIndexBuffer(
@@ -995,9 +1228,9 @@ void SDL_GpuBindIndexBuffer(
 
 void SDL_GpuBindVertexSamplers(
     SDL_GpuRenderPass *renderPass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuTextureSamplerBinding *textureSamplerBindings,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1011,6 +1244,13 @@ void SDL_GpuBindVertexSamplers(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"y must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->BindVertexSamplers(
@@ -1022,9 +1262,9 @@ void SDL_GpuBindVertexSamplers(
 
 void SDL_GpuBindVertexStorageTextures(
     SDL_GpuRenderPass *renderPass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuTextureSlice *storageTextureSlices,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1038,6 +1278,17 @@ void SDL_GpuBindVertexStorageTextures(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"bindingCount must be greater than zero.");
+        } else {
+            for (int i = 0; i < bindingCount; ++i) {
+                SDL_GpuAssertTextureSlice(storageTextureSlices + i);
+            }
+        }
     }
 
     RENDERPASS_DEVICE->BindVertexStorageTextures(
@@ -1049,9 +1300,9 @@ void SDL_GpuBindVertexStorageTextures(
 
 void SDL_GpuBindVertexStorageBuffers(
     SDL_GpuRenderPass *renderPass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuBuffer **storageBuffers,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1065,6 +1316,13 @@ void SDL_GpuBindVertexStorageBuffers(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"bindingCount must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->BindVertexStorageBuffers(
@@ -1076,9 +1334,9 @@ void SDL_GpuBindVertexStorageBuffers(
 
 void SDL_GpuBindFragmentSamplers(
     SDL_GpuRenderPass *renderPass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuTextureSamplerBinding *textureSamplerBindings,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1092,6 +1350,13 @@ void SDL_GpuBindFragmentSamplers(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"bindingCount must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->BindFragmentSamplers(
@@ -1103,9 +1368,9 @@ void SDL_GpuBindFragmentSamplers(
 
 void SDL_GpuBindFragmentStorageTextures(
     SDL_GpuRenderPass *renderPass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuTextureSlice *storageTextureSlices,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1119,6 +1384,17 @@ void SDL_GpuBindFragmentStorageTextures(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"bindingCount must be greater than zero.");
+        } else {
+            for (int i = 0; i < bindingCount; ++i) {
+                SDL_GpuAssertTextureSlice(storageTextureSlices + i);
+            }
+        }
     }
 
     RENDERPASS_DEVICE->BindFragmentStorageTextures(
@@ -1130,9 +1406,9 @@ void SDL_GpuBindFragmentStorageTextures(
 
 void SDL_GpuBindFragmentStorageBuffers(
     SDL_GpuRenderPass *renderPass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuBuffer **storageBuffers,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1146,6 +1422,13 @@ void SDL_GpuBindFragmentStorageBuffers(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"bindingCount must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->BindFragmentStorageBuffers(
@@ -1157,10 +1440,10 @@ void SDL_GpuBindFragmentStorageBuffers(
 
 void SDL_GpuDrawIndexedPrimitives(
     SDL_GpuRenderPass *renderPass,
-    Uint32 baseVertex,
-    Uint32 startIndex,
-    Uint32 vertexCount,
-    Uint32 instanceCount)
+    int baseVertex,
+    int startIndex,
+    int vertexCount,
+    int instanceCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1170,6 +1453,19 @@ void SDL_GpuDrawIndexedPrimitives(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (baseVertex < 0) {
+            SDL_assert_release(!"baseVertex must be greater than zero.");
+        }
+        if (startIndex < 0) {
+            SDL_assert_release(!"startIndex must be greater than zero.");
+        }
+        if (vertexCount < 0) {
+            SDL_assert_release(!"vertexCount must be greater than zero.");
+        }
+        if (instanceCount < 0) {
+            SDL_assert_release(!"instanceCount must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->DrawIndexedPrimitives(
@@ -1182,8 +1478,8 @@ void SDL_GpuDrawIndexedPrimitives(
 
 void SDL_GpuDrawPrimitives(
     SDL_GpuRenderPass *renderPass,
-    Uint32 vertexStart,
-    Uint32 vertexCount)
+    int vertexStart,
+    int vertexCount)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1193,6 +1489,13 @@ void SDL_GpuDrawPrimitives(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (vertexStart < 0) {
+            SDL_assert_release(!"vertexStart must be greater than zero.");
+        }
+        if (vertexCount < 0) {
+            SDL_assert_release(!"vertexCount must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->DrawPrimitives(
@@ -1204,9 +1507,9 @@ void SDL_GpuDrawPrimitives(
 void SDL_GpuDrawPrimitivesIndirect(
     SDL_GpuRenderPass *renderPass,
     SDL_GpuBuffer *buffer,
-    Uint32 offsetInBytes,
-    Uint32 drawCount,
-    Uint32 stride)
+    int offsetInBytes,
+    int drawCount,
+    int stride)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1220,6 +1523,16 @@ void SDL_GpuDrawPrimitivesIndirect(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (offsetInBytes < 0) {
+            SDL_assert_release(!"offsetInBytes must be greater than zero.");
+        }
+        if (drawCount < 0) {
+            SDL_assert_release(!"drawCount must be greater than zero.");
+        }
+        if (stride < 0) {
+            SDL_assert_release(!"stride must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->DrawPrimitivesIndirect(
@@ -1233,9 +1546,9 @@ void SDL_GpuDrawPrimitivesIndirect(
 void SDL_GpuDrawIndexedPrimitivesIndirect(
     SDL_GpuRenderPass *renderPass,
     SDL_GpuBuffer *buffer,
-    Uint32 offsetInBytes,
-    Uint32 drawCount,
-    Uint32 stride)
+    int offsetInBytes,
+    int drawCount,
+    int stride)
 {
     if (renderPass == NULL) {
         SDL_InvalidParamError("renderPass");
@@ -1249,6 +1562,16 @@ void SDL_GpuDrawIndexedPrimitivesIndirect(
     if (RENDERPASS_DEVICE->debugMode) {
         CHECK_RENDERPASS
         CHECK_GRAPHICS_PIPELINE_BOUND
+
+        if (offsetInBytes < 0) {
+            SDL_assert_release(!"offsetInBytes must be greater than zero.");
+        }
+        if (drawCount < 0) {
+            SDL_assert_release(!"drawCount must be greater than zero.");
+        }
+        if (stride < 0) {
+            SDL_assert_release(!"stride must be greater than zero.");
+        }
     }
 
     RENDERPASS_DEVICE->DrawIndexedPrimitivesIndirect(
@@ -1286,9 +1609,9 @@ void SDL_GpuEndRenderPass(
 SDL_GpuComputePass *SDL_GpuBeginComputePass(
     SDL_GpuCommandBuffer *commandBuffer,
     SDL_GpuStorageTextureReadWriteBinding *storageTextureBindings,
-    Uint32 storageTextureBindingCount,
+    int storageTextureBindingCount,
     SDL_GpuStorageBufferReadWriteBinding *storageBufferBindings,
-    Uint32 storageBufferBindingCount)
+    int storageBufferBindingCount)
 {
     CommandBufferCommonHeader *commandBufferHeader;
 
@@ -1308,6 +1631,17 @@ SDL_GpuComputePass *SDL_GpuBeginComputePass(
     if (COMMAND_BUFFER_DEVICE->debugMode) {
         CHECK_COMMAND_BUFFER_RETURN_NULL
         CHECK_ANY_PASS_IN_PROGRESS
+
+        if (storageTextureBindingCount < 0) {
+            SDL_assert_release(!"storageTextureBindingCount must be greater than zero.");
+        } else {
+            for (int i = 0; i < storageTextureBindingCount; ++i) {
+                SDL_GpuAssertTextureSlice(&storageTextureBindings[i].textureSlice);
+            }
+        }
+        if (storageBufferBindingCount < 0) {
+            SDL_assert_release(!"storageBufferBindingCount must be greater than zero.");
+        }
     }
 
     COMMAND_BUFFER_DEVICE->BeginComputePass(
@@ -1351,9 +1685,9 @@ void SDL_GpuBindComputePipeline(
 
 void SDL_GpuBindComputeStorageTextures(
     SDL_GpuComputePass *computePass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuTextureSlice *storageTextureSlices,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (computePass == NULL) {
         SDL_InvalidParamError("computePass");
@@ -1367,6 +1701,17 @@ void SDL_GpuBindComputeStorageTextures(
     if (COMPUTEPASS_DEVICE->debugMode) {
         CHECK_COMPUTEPASS
         CHECK_COMPUTE_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"bindingCount must be greater than zero.");
+        } else {
+            for (int i = 0; i < bindingCount; ++i) {
+                SDL_GpuAssertTextureSlice(storageTextureSlices + i);
+            }
+        }
     }
 
     COMPUTEPASS_DEVICE->BindComputeStorageTextures(
@@ -1378,9 +1723,9 @@ void SDL_GpuBindComputeStorageTextures(
 
 void SDL_GpuBindComputeStorageBuffers(
     SDL_GpuComputePass *computePass,
-    Uint32 firstSlot,
+    int firstSlot,
     SDL_GpuBuffer **storageBuffers,
-    Uint32 bindingCount)
+    int bindingCount)
 {
     if (computePass == NULL) {
         SDL_InvalidParamError("computePass");
@@ -1394,6 +1739,13 @@ void SDL_GpuBindComputeStorageBuffers(
     if (COMPUTEPASS_DEVICE->debugMode) {
         CHECK_COMPUTEPASS
         CHECK_COMPUTE_PIPELINE_BOUND
+
+        if (firstSlot < 0) {
+            SDL_assert_release(!"firstSlot must be greater than zero.");
+        }
+        if (bindingCount < 0) {
+            SDL_assert_release(!"bindingCount must be greater than zero.");
+        }
     }
 
     COMPUTEPASS_DEVICE->BindComputeStorageBuffers(
@@ -1405,9 +1757,9 @@ void SDL_GpuBindComputeStorageBuffers(
 
 void SDL_GpuDispatchCompute(
     SDL_GpuComputePass *computePass,
-    Uint32 groupCountX,
-    Uint32 groupCountY,
-    Uint32 groupCountZ)
+    int groupCountX,
+    int groupCountY,
+    int groupCountZ)
 {
     if (computePass == NULL) {
         SDL_InvalidParamError("computePass");
@@ -1417,6 +1769,16 @@ void SDL_GpuDispatchCompute(
     if (COMPUTEPASS_DEVICE->debugMode) {
         CHECK_COMPUTEPASS
         CHECK_COMPUTE_PIPELINE_BOUND
+
+        if (groupCountX < 0) {
+            SDL_assert_release(!"groupCountX must be greater than zero.");
+        }
+        if (groupCountY < 0) {
+            SDL_assert_release(!"groupCountY must be greater than zero.");
+        }
+        if (groupCountZ < 0) {
+            SDL_assert_release(!"groupCountZ must be greater than zero.");
+        }
     }
 
     COMPUTEPASS_DEVICE->DispatchCompute(
@@ -1429,7 +1791,7 @@ void SDL_GpuDispatchCompute(
 void SDL_GpuDispatchComputeIndirect(
     SDL_GpuComputePass *computePass,
     SDL_GpuBuffer *buffer,
-    Uint32 offsetInBytes
+    int offsetInBytes
 ) {
     if (computePass == NULL) {
         SDL_InvalidParamError("computePass");
@@ -1439,6 +1801,10 @@ void SDL_GpuDispatchComputeIndirect(
     if (COMPUTEPASS_DEVICE->debugMode) {
         CHECK_COMPUTEPASS
         CHECK_COMPUTE_PIPELINE_BOUND
+
+        if (offsetInBytes < 0) {
+            SDL_assert_release(!"offsetInBytes must be greater than zero.");
+        }
     }
 
     COMPUTEPASS_DEVICE->DispatchComputeIndirect(
@@ -1555,6 +1921,9 @@ void SDL_GpuUploadToTexture(
 
     if (COPYPASS_DEVICE->debugMode) {
         CHECK_COPYPASS
+
+        SDL_GpuAssertTextureTransferInfo(source);
+        SDL_GpuAssertTextureRegion(destination);
     }
 
     COPYPASS_DEVICE->UploadToTexture(
@@ -1583,6 +1952,13 @@ void SDL_GpuUploadToBuffer(
         return;
     }
 
+    if (COPYPASS_DEVICE->debugMode) {
+        CHECK_COPYPASS
+
+        SDL_GpuAssertTransferBufferLocation(source);
+        SDL_GpuAssertBufferRegion(destination);
+    }
+
     COPYPASS_DEVICE->UploadToBuffer(
         COPYPASS_COMMAND_BUFFER,
         source,
@@ -1594,9 +1970,9 @@ void SDL_GpuCopyTextureToTexture(
     SDL_GpuCopyPass *copyPass,
     SDL_GpuTextureLocation *source,
     SDL_GpuTextureLocation *destination,
-    Uint32 w,
-    Uint32 h,
-    Uint32 d,
+    int w,
+    int h,
+    int d,
     SDL_bool cycle)
 {
     if (copyPass == NULL) {
@@ -1610,6 +1986,22 @@ void SDL_GpuCopyTextureToTexture(
     if (destination == NULL) {
         SDL_InvalidParamError("destination");
         return;
+    }
+
+    if (COPYPASS_DEVICE->debugMode) {
+        CHECK_COPYPASS
+
+        SDL_GpuAssertTextureLocation(source);
+        SDL_GpuAssertTextureLocation(destination);
+        if (w < 0) {
+            SDL_assert_release(!"w must be greater than zero.");
+        }
+        if (h < 0) {
+            SDL_assert_release(!"h must be greater than zero.");
+        }
+        if (d < 0) {
+            SDL_assert_release(!"d must be greater than zero.");
+        }
     }
 
     COPYPASS_DEVICE->CopyTextureToTexture(
@@ -1626,7 +2018,7 @@ void SDL_GpuCopyBufferToBuffer(
     SDL_GpuCopyPass *copyPass,
     SDL_GpuBufferLocation *source,
     SDL_GpuBufferLocation *destination,
-    Uint32 size,
+    Uint32 sizeInBytes,
     SDL_bool cycle)
 {
     if (copyPass == NULL) {
@@ -1642,11 +2034,18 @@ void SDL_GpuCopyBufferToBuffer(
         return;
     }
 
+    if (COPYPASS_DEVICE->debugMode) {
+        CHECK_COPYPASS
+
+        SDL_GpuAssertBufferLocation(source);
+        SDL_GpuAssertBufferLocation(destination);
+    }
+
     COPYPASS_DEVICE->CopyBufferToBuffer(
         COPYPASS_COMMAND_BUFFER,
         source,
         destination,
-        size,
+        sizeInBytes,
         cycle);
 }
 
@@ -1661,6 +2060,10 @@ void SDL_GpuGenerateMipmaps(
     if (texture == NULL) {
         SDL_InvalidParamError("texture");
         return;
+    }
+
+    if (COPYPASS_DEVICE->debugMode) {
+        CHECK_COPYPASS
     }
 
     COPYPASS_DEVICE->GenerateMipmaps(
@@ -1686,6 +2089,13 @@ void SDL_GpuDownloadFromTexture(
         return;
     }
 
+    if (COPYPASS_DEVICE->debugMode) {
+        CHECK_COPYPASS
+
+        SDL_GpuAssertTextureRegion(source);
+        SDL_GpuAssertTextureTransferInfo(destination);
+    }
+
     COPYPASS_DEVICE->DownloadFromTexture(
         COPYPASS_COMMAND_BUFFER,
         source,
@@ -1708,6 +2118,13 @@ void SDL_GpuDownloadFromBuffer(
     if (destination == NULL) {
         SDL_InvalidParamError("destination");
         return;
+    }
+
+    if (COPYPASS_DEVICE->debugMode) {
+        CHECK_COPYPASS
+
+        SDL_GpuAssertBufferRegion(source);
+        SDL_GpuAssertTransferBufferLocation(destination);
     }
 
     COPYPASS_DEVICE->DownloadFromBuffer(
@@ -1756,6 +2173,9 @@ void SDL_GpuBlit(
 
     if (COMMAND_BUFFER_DEVICE->debugMode) {
         CHECK_COMMAND_BUFFER
+
+        SDL_GpuAssertTextureRegion(source);
+        SDL_GpuAssertTextureRegion(destination);
 
         /* Validation */
         SDL_bool failed = SDL_FALSE;
@@ -1899,9 +2319,12 @@ SDL_GpuTextureFormat SDL_GpuGetSwapchainTextureFormat(
 SDL_GpuTexture *SDL_GpuAcquireSwapchainTexture(
     SDL_GpuCommandBuffer *commandBuffer,
     SDL_Window *window,
-    Uint32 *pWidth,
-    Uint32 *pHeight)
+    int *pWidth,
+    int *pHeight)
 {
+    Uint32 width = 0;
+    Uint32 height = 0;
+
     if (commandBuffer == NULL) {
         SDL_InvalidParamError("commandBuffer");
         return NULL;
@@ -1910,24 +2333,26 @@ SDL_GpuTexture *SDL_GpuAcquireSwapchainTexture(
         SDL_InvalidParamError("window");
         return NULL;
     }
-    if (pWidth == NULL) {
-        SDL_InvalidParamError("pWidth");
-        return NULL;
-    }
-    if (pHeight == NULL) {
-        SDL_InvalidParamError("pHeight");
-        return NULL;
-    }
 
     if (COMMAND_BUFFER_DEVICE->debugMode) {
         CHECK_COMMAND_BUFFER_RETURN_NULL
     }
 
-    return COMMAND_BUFFER_DEVICE->AcquireSwapchainTexture(
+    SDL_GpuTexture* result = COMMAND_BUFFER_DEVICE->AcquireSwapchainTexture(
         commandBuffer,
         window,
-        pWidth,
-        pHeight);
+        &width,
+        &height);
+
+    if (pWidth) {
+        *pWidth = (int)width;
+    }
+
+    if (pHeight) {
+        *pHeight = (int)height;
+    }
+
+    return result;
 }
 
 void SDL_GpuSubmit(
@@ -1946,7 +2371,7 @@ void SDL_GpuSubmit(
             commandBufferHeader->renderPass.inProgress ||
             commandBufferHeader->computePass.inProgress ||
             commandBufferHeader->copyPass.inProgress) {
-            SDL_assert_release(!"Cannot submit command buffer while a pass is in progress!");
+            SDL_assert_release(!"Cannot submit command buffer while a pass is in progress.");
             return;
         }
     }
@@ -1973,7 +2398,7 @@ SDL_GpuFence *SDL_GpuSubmitAndAcquireFence(
             commandBufferHeader->renderPass.inProgress ||
             commandBufferHeader->computePass.inProgress ||
             commandBufferHeader->copyPass.inProgress) {
-            SDL_assert_release(!"Cannot submit command buffer while a pass is in progress!");
+            SDL_assert_release(!"Cannot submit command buffer while a pass is in progress.");
             return NULL;
         }
     }
@@ -1997,12 +2422,18 @@ void SDL_GpuWaitForFences(
     SDL_GpuDevice *device,
     SDL_bool waitAll,
     SDL_GpuFence **pFences,
-    Uint32 fenceCount)
+    int fenceCount)
 {
     CHECK_DEVICE_MAGIC(device, );
     if (pFences == NULL && fenceCount > 0) {
         SDL_InvalidParamError("pFences");
         return;
+    }
+
+    if (device->debugMode) {
+        if (fenceCount < 0) {
+            SDL_assert_release(!"fenceCount must be greater than zero.");
+        }
     }
 
     device->WaitForFences(

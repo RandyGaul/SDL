@@ -2101,7 +2101,7 @@ static D3D12ComputeRootSignature *D3D12_INTERNAL_CreateComputeRootSignature(
         parameterCount += 1;
     }
 
-    for (Uint32 i = 0; i < createInfo->uniformBufferCount; i += 1) {
+    for (int i = 0; i < createInfo->uniformBufferCount; i += 1) {
         rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
         rootParameter.Descriptor.ShaderRegister = i;
         rootParameter.Descriptor.RegisterSpace = 2;
@@ -2280,7 +2280,7 @@ static SDL_bool D3D12_INTERNAL_ConvertBlendState(SDL_GpuGraphicsPipelineCreateIn
     blendDesc->AlphaToCoverageEnable = FALSE;
     blendDesc->IndependentBlendEnable = FALSE;
 
-    for (UINT i = 0; i < MAX_COLOR_TARGET_BINDINGS; i += 1) {
+    for (int i = 0; i < MAX_COLOR_TARGET_BINDINGS; i += 1) {
         D3D12_RENDER_TARGET_BLEND_DESC rtBlendDesc;
         rtBlendDesc.BlendEnable = FALSE;
         rtBlendDesc.LogicOpEnable = FALSE;
@@ -2351,7 +2351,7 @@ static SDL_bool D3D12_INTERNAL_ConvertVertexInputState(SDL_GpuVertexInputState v
         return SDL_FALSE;
     }
 
-    for (Uint32 i = 0; i < vertexInputState.vertexAttributeCount; i += 1) {
+    for (int i = 0; i < vertexInputState.vertexAttributeCount; i += 1) {
         SDL_GpuVertexAttribute attribute = vertexInputState.vertexAttributes[i];
 
         desc[i].SemanticName = semantic;
@@ -2443,7 +2443,7 @@ static SDL_GpuGraphicsPipeline *D3D12_CreateGraphicsPipeline(
 
     psoDesc.DSVFormat = SDLToD3D12_TextureFormat[pipelineCreateInfo->attachmentInfo.depthStencilFormat];
     psoDesc.NumRenderTargets = pipelineCreateInfo->attachmentInfo.colorAttachmentCount;
-    for (uint32_t i = 0; i < pipelineCreateInfo->attachmentInfo.colorAttachmentCount; i += 1) {
+    for (int i = 0; i < pipelineCreateInfo->attachmentInfo.colorAttachmentCount; i += 1) {
         psoDesc.RTVFormats[i] = SDLToD3D12_TextureFormat[pipelineCreateInfo->attachmentInfo.colorAttachmentDescriptions[i].format];
     }
 
@@ -2482,7 +2482,7 @@ static SDL_GpuGraphicsPipeline *D3D12_CreateGraphicsPipeline(
 
     pipeline->pipelineState = pipelineState;
 
-    for (Uint32 i = 0; i < pipelineCreateInfo->vertexInputState.vertexBindingCount; i += 1) {
+    for (int i = 0; i < pipelineCreateInfo->vertexInputState.vertexBindingCount; i += 1) {
         pipeline->vertexStrides[i] = pipelineCreateInfo->vertexInputState.vertexBindings[i].stride;
     }
 
@@ -2727,12 +2727,12 @@ static D3D12Texture *D3D12_INTERNAL_CreateTexture(
         D3D12_INTERNAL_DestroyTexture(renderer, texture);
         return NULL;
     }
-    for (Uint32 layerIndex = 0; layerIndex < textureCreateInfo->layerCount; layerIndex += 1) {
-        for (Uint32 levelIndex = 0; levelIndex < textureCreateInfo->levelCount; levelIndex += 1) {
+    for (int layerIndex = 0; layerIndex < textureCreateInfo->layerCount; layerIndex += 1) {
+        for (int levelIndex = 0; levelIndex < textureCreateInfo->levelCount; levelIndex += 1) {
             Uint32 subresourceIndex = D3D12_INTERNAL_CalcSubresource(
-                levelIndex,
-                layerIndex,
-                textureCreateInfo->levelCount);
+                (int)levelIndex,
+                (int)layerIndex,
+                (int)textureCreateInfo->levelCount);
 
             texture->subresources[subresourceIndex].parent = texture;
             texture->subresources[subresourceIndex].layer = layerIndex;
@@ -5078,10 +5078,10 @@ static void D3D12_UploadToTexture(
     D3D12Buffer *temporaryBuffer = NULL;
     D3D12_TEXTURE_COPY_LOCATION sourceLocation;
     D3D12_TEXTURE_COPY_LOCATION destinationLocation;
-    Uint32 pixelsPerRow = source->imagePitch;
+    Uint32 pixelsPerRow = (Uint32)source->imagePitch;
     Uint32 rowPitch;
     Uint32 alignedRowPitch;
-    Uint32 rowsPerSlice = source->imageHeight;
+    Uint32 rowsPerSlice = (Uint32)source->imageHeight;
     Uint32 bytesPerSlice;
     SDL_bool needsRealignment;
     SDL_bool needsPlacementCopy;
@@ -5145,7 +5145,7 @@ static void D3D12_UploadToTexture(
 
         sourceLocation.pResource = temporaryBuffer->handle;
 
-        for (Uint32 sliceIndex = 0; sliceIndex < destination->d; sliceIndex += 1) {
+        for (int sliceIndex = 0; sliceIndex < destination->d; sliceIndex += 1) {
             for (Uint32 rowIndex = 0; rowIndex < rowsPerSlice; rowIndex += 1) {
                 SDL_memcpy(
                     temporaryBuffer->mapPointer + (sliceIndex * rowsPerSlice) + (rowIndex * alignedRowPitch),
